@@ -12,7 +12,12 @@ config["TIME_BETWEEN_SENDS"] = 30
 
 
 def get_dictionary_workers():
-    return b.get_workers_to_images_dict()
+    dict = {}
+    try:
+        dict = b.get_workers_to_images_dict()
+    except:
+        print("can't get dictionary workers")
+    return dict
 
 
 # Get image, save local, return path.
@@ -204,7 +209,6 @@ def post_ids_to_manager(dict={}):
     dict = json.dumps(dict)
     url = 'http://127.0.0.1:5004/'
     x = requests.post(url, data={'dict': dict})
-    print("status")
     print(x)
 
 
@@ -234,7 +238,8 @@ def analayzer(list_images):
             if not is_init_dict_workers:
                 print("get dictionary workers")
                 dict_workers = get_dictionary_workers()
-                is_init_dict_workers = True
+                if len(dict_workers) > 0:
+                    is_init_dict_workers = True
             # If there is no match, return -1.
             id_worker = get_id_worker(face, dict_workers)
 

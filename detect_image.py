@@ -7,7 +7,9 @@ import argparse
 import cv2
 import os
 
-
+# load the face mask detector model from disk
+model = load_model("mask_detector.model")
+print("load model")
 def mask_image(image):
     # construct the argument parser and parse the arguments
     confidence = 0.5
@@ -17,8 +19,7 @@ def mask_image(image):
                                     "res10_300x300_ssd_iter_140000.caffemodel"])
     net = cv2.dnn.readNet(prototxtPath, weightsPath)
 
-    # load the face mask detector model from disk
-    model = load_model("mask_detector.model")
+
 
     # load the input image from disk, clone it, and grab the image spatial
     # dimensions
