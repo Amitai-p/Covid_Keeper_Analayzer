@@ -3,7 +3,8 @@ import face_recognition
 import os
 import requests
 from keras.models import load_model
-from azure_sql_server_actual import *
+from azure_sql_server import *
+from detect_image import mask_image
 
 b = Database()
 config = {}
@@ -51,8 +52,8 @@ def check_equal_images(known_image, unknown_image):
     return results[0]
 
 
-def get_id_worker(face):
-    dict_workers = get_dictionary_workers()
+def get_id_worker(face, dict_workers):
+    # dict_workers = get_dictionary_workers()
     for key in dict_workers:
         if check_equal_images(dict_workers[key], face):
             return key
@@ -84,23 +85,23 @@ def get_list_faces(image):
     return list_images
 
 
-model1 = load_model("models/model1.model")
-model2 = load_model("models/model2.model")
-print("load models")
+# model1 = load_model("models/model1.model")
+# model2 = load_model("models/model2.model")
+# print("load models")
 
-
-def mask_detect(image):
-    result1 = test_model_i(image, model1)
-    result2 = test_model_i(image, model2)
-    if (result1 == None and result2 == None):
-        return None
-    if (result1 == None):
-        result1 = 0
-    if (result2 == None):
-        result2 = 0
-    if ((result1 + result2) > 0):
-        return True
-    return False
+#
+# def mask_detect(image):
+#     result1 = test_model_i(image, model1)
+#     result2 = test_model_i(image, model2)
+#     if (result1 == None and result2 == None):
+#         return None
+#     if (result1 == None):
+#         result1 = 0
+#     if (result2 == None):
+#         result2 = 0
+#     if ((result1 + result2) > 0):
+#         return True
+#     return False
 
 
 def test_model_i(image, model):
@@ -207,22 +208,35 @@ def post_ids_to_manager(dict={}):
     print(x)
 
 
+dict_workers = {}
+is_init_dict_workers = False
+
+
 def analayzer(list_images):
+    print("analayzer")
     time_before = time.time()
     dict_id_workers_without_mask = {}
-
-    # time.sleep(1)
-    #
-    # post_ids_to_manager(dict_id_workers_without_mask)
-    # return
     for image in list_images:
         list_faces = get_list_faces(image)
         for face in list_faces:
-            if mask_detect(face):
+            try:
+                res = mask_image(face)
+            except:
+                print("problem with result model")
+                res = "No Mask"
+            print("result: ", res)
+            if res == "Mask":
                 print("with mask")
                 continue
+            print("without mask")
+            global is_init_dict_workers
+            global dict_workers
+            if not is_init_dict_workers:
+                print("get dictionary workers")
+                dict_workers = get_dictionary_workers()
+                is_init_dict_workers = True
             # If there is no match, return -1.
-            id_worker = get_id_worker(face)
+            id_worker = get_id_worker(face, dict_workers)
 
             print("id: ", id_worker)
 
@@ -231,11 +245,22 @@ def analayzer(list_images):
             # print("before face")
             dict_id_workers_without_mask[id_worker] = face
             # print("after face")
-
+    is_init_dict_workers = False
     import copy
     post_ids_to_manager(copy.deepcopy(dict_id_workers_without_mask))
     print("time after from db: ", time.time() - time_before)
 
+
+from flask import Flask, jsonify, request
+import json, os, signal
+
+
+@app.route('/stop_server', methods=['GET'])
+def stopServer():
+    print("stopppp")
+    os.kill(os.getpid(), signal.SIGINT)
+    print("get pid")
+    return jsonify({"success": True, "message": "Server is shutting down..."})
 
 
 def run_server():
@@ -251,7 +276,6 @@ def run_server():
 
 def main():
     run_server()
-    a = 1
 
 
 main()
