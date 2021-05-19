@@ -7,8 +7,10 @@ from azure_sql_server import *
 from detect_image import mask_image
 
 NAME_COMPONENT = 'Analayzer'
+PORT_COMPONENT = '5002'
 b = Database()
 b.set_ip_by_table_name(NAME_COMPONENT)
+b.set_port_by_table_name(NAME_COMPONENT, PORT_COMPONENT)
 
 
 def update_config_ip_port(config):
@@ -281,7 +283,8 @@ def analayzer(list_images):
             if id_worker == -1:
                 continue
             # print("before face")
-            dict_id_workers_without_mask[id_worker] = face
+            #dict_id_workers_without_mask[id_worker] = face
+            dict_id_workers_without_mask[id_worker] = image
             # print("after face")
     is_init_dict_workers = False
     import copy

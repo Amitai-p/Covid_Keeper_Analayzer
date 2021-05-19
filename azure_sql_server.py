@@ -193,6 +193,10 @@ class Database:
         self.update_query("update [dbo].[Ip_port_components] set " + table_name + "_ip = '" + my_ip + "'")
         self.turn_on_components_ip_port_flags()
 
+    def set_port_by_table_name(self, table_name, port):
+        self.update_query("update [dbo].[Ip_port_components] set " + table_name + "_port = " + port)
+        self.turn_on_components_ip_port_flags()
+
     def turn_on_components_ip_port_flags(self):
         self.update_query("update [dbo].[Ip_port_components] set Manager_handle = 1, "
                           "Analayzer_handle = 1, Camera_handle = 1")
