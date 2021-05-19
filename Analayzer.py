@@ -240,6 +240,7 @@ dict_workers = {}
 is_init_dict_workers = False
 
 
+
 def check_config_ip_port():
     if b.get_flag_ip_port_by_table_name(NAME_COMPONENT) == '1':
         update_config_ip_port(config)
