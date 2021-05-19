@@ -6,9 +6,27 @@ from keras.models import load_model
 from azure_sql_server import *
 from detect_image import mask_image
 
+NAME_COMPONENT = 'Analayzer'
 b = Database()
-config = {}
-config["TIME_BETWEEN_SENDS"] = 30
+b.set_ip_by_table_name(NAME_COMPONENT)
+
+
+def update_config_ip_port(config):
+    dict = b.get_ip_port_config(NAME_COMPONENT)
+    for conf in dict:
+        config[conf] = dict[conf]
+    return config
+
+
+def init_config():
+    config = {}
+    config["TIME_BETWEEN_SENDS"] = 30
+    config = update_config_ip_port(config)
+    print(config)
+    return config
+
+
+config = init_config()
 
 
 def get_dictionary_workers():
@@ -204,10 +222,16 @@ def convert_dict_for_sending(dict):
     return dict
 
 
+def get_url_manager():
+    url = 'http://' + config['Manager_ip'] + ':' + config['Manager_port'] + '/'
+    return url
+
+
 def post_ids_to_manager(dict={}):
     dict = convert_dict_for_sending(dict)
     dict = json.dumps(dict)
     url = 'http://127.0.0.1:5004/'
+    url = get_url_manager()
     x = requests.post(url, data={'dict': dict})
     print(x)
 
@@ -216,7 +240,15 @@ dict_workers = {}
 is_init_dict_workers = False
 
 
+def check_config_ip_port():
+    if b.get_flag_ip_port_by_table_name(NAME_COMPONENT) == '1':
+        update_config_ip_port(config)
+        print("after update")
+        print(config)
+
+
 def analayzer(list_images):
+    check_config_ip_port()
     print("analayzer")
     time_before = time.time()
     dict_id_workers_without_mask = {}
@@ -273,7 +305,7 @@ def run_server():
     while True:
         try:
             from waitress import serve
-            serve(app, host="127.0.0.1", port=5002)
+            serve(app, host=config[NAME_COMPONENT + '_ip'], port=int(config[NAME_COMPONENT + '_port']))
             # app.run(port=5002, debug=True)
         except:
             a = 1
