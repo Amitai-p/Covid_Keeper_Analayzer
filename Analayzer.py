@@ -168,8 +168,7 @@ def convert_image_to_varbinary(filename):
 
 
 def get_list_images(response):
-    result = response
-    data = json.loads(result)
+    data = json.loads(response)
     list_images = []
     for key in data:
         decoded_image_data = base64.decodebytes(bytes(data[key], encoding='utf8'))
@@ -248,8 +247,6 @@ def analayzer(list_images):
 
             if id_worker == -1:
                 continue
-            # print("before face")
-            # dict_id_workers_without_mask[id_worker] = face
             dict_id_workers_without_mask[id_worker] = image
             # print("after face")
     is_init_dict_workers = False
