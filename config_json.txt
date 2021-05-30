@@ -1,0 +1,1 @@
+"{\"TIME_BETWEEN_SENDS\": 30, \"Manager_port\": \"5004\", \"Manager_ip\": \"127.0.0.1\", \"Analayzer_port\": \"5002\", \"Analayzer_ip\": \"127.0.0.1\", \"Camera_port\": \"5000\", \"Camera_ip\": \"127.0.0.1\"}"

@@ -39,7 +39,33 @@ def init_config():
     return config
 
 
-config = init_config()
+def init_config_from_file():
+    PATH_TO_CONFIG = 'config_json.txt'
+    config = read_json(PATH_TO_CONFIG)
+    config = update_config_ip_port(config)
+    return config
+
+
+# Insert the config into json file.
+def inset_dict_json(path_to_file, config):
+    import json
+    config_json = json.dumps(config)
+    with open(path_to_file, 'w') as json_file:
+        json.dump(config_json, json_file)
+
+
+# Read the json file of the config.
+def read_json(path_to_file):
+    import json
+    with open(path_to_file) as f:
+        # From file to string.
+        data = json.load(f)
+        # From string to dictionary.
+        data = json.loads(data)
+    return data
+
+
+config = init_config_from_file()
 
 
 # Get dictionary of the ids workers with their photos.
