@@ -116,6 +116,7 @@ def check_equal_images(known_image, unknown_image):
     return results[0]
 
 
+
 # Get image of person without mask and dictionary of the workers. Return the id of this person.
 # If not found, return -1.
 def get_id_worker(face, dict_workers):
