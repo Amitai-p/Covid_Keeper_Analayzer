@@ -189,8 +189,8 @@ class Database:
 
     def set_ip_by_table_name(self, table_name):
         import socket
-        my_ip = socket.gethostbyname(socket.gethostname())
-        print("my: ", my_ip)
+        # my_ip = socket.gethostbyname(socket.gethostname())
+        my_ip = '127.0.0.1'
         self.update_query("update [dbo].[Ip_port_components] set " + table_name + "_ip = '" + my_ip + "'")
         self.turn_on_components_ip_port_flags()
 

@@ -2,7 +2,7 @@ import time
 import face_recognition
 import os
 import requests
-from keras.models import load_model
+# from keras.models import load_model
 from azure_sql_server import *
 from detect_image import mask_image
 from requests import get
@@ -220,7 +220,7 @@ def post_ids_to_manager(dict={}):
     dict = convert_dict_for_sending(dict)
     dict = json.dumps(dict)
     url = 'http://127.0.0.1:5004/'
-    url = get_url_manager()
+    # url = get_url_manager()
     x = requests.post(url, data={'dict': dict})
     print(x)
 
@@ -299,7 +299,7 @@ def run_server():
     while True:
         try:
             from waitress import serve
-            serve(app, host=config[NAME_COMPONENT + '_ip'], port=int(config[NAME_COMPONENT + '_port']))
+            serve(app, host='127.0.0.1', port=int(config[NAME_COMPONENT + '_port']))
             # app.run(port=5002, debug=True)
         except:
             print("There is a problem with starting the analyzer")
