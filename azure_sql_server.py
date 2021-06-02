@@ -209,6 +209,16 @@ class Database:
             return None
         return result[0]
 
+
+    def get_analayzer_config_flag(self):
+        result = self.select_query_of_one_row("select Handle from [dbo].[Analayzer_config]")
+        if not result:
+            return None
+        return result[0]
+
+    def set_analayzer_config_flag(self):
+        self.update_query("update [dbo].[Analayzer_config] set Handle = 0")
+
     def select_query_of_one_row(self, query):
         self.open_connection()
         self.open_cursor()

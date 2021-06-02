@@ -72,7 +72,9 @@ config = init_config_from_file()
 def get_dictionary_workers():
     dict = {}
     try:
+        print('try to get new dictionary')
         dict = b.get_workers_to_images_dict()
+        b.set_analayzer_config_flag()
     except:
         print("can't get dictionary workers")
     return dict
@@ -114,7 +116,6 @@ def check_equal_images(known_image, unknown_image):
         delete_image(path_unknown)
         return False
     return results[0]
-
 
 
 # Get image of person without mask and dictionary of the workers. Return the id of this person.
@@ -225,8 +226,11 @@ def post_ids_to_manager(dict={}):
     print(x)
 
 
-dict_workers = {}
-is_init_dict_workers = False
+# dict_workers = {}
+dict_workers = get_dictionary_workers()
+
+
+# is_init_dict_workers = False
 
 
 # Check if the flag of the config was chnaged and update if the flag equal to 1.
@@ -261,13 +265,15 @@ def analayzer(list_images):
                 print("with mask")
                 continue
             print("without mask")
-            global is_init_dict_workers
-            global dict_workers
-            if not is_init_dict_workers:
+            # global is_init_dict_workers
+            # global dict_workers
+            flag_update_dict = int(b.get_analayzer_config_flag())
+            if flag_update_dict == 1:
                 print("get dictionary workers")
+                global dict_workers
                 dict_workers = get_dictionary_workers()
-                if len(dict_workers) > 0:
-                    is_init_dict_workers = True
+                # if len(dict_workers) > 0:
+                #     is_init_dict_workers = True
             # If there is no match, return -1.
             id_worker = get_id_worker(face, dict_workers)
             print("id: ", id_worker)
