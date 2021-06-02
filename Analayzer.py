@@ -15,11 +15,10 @@ PORT_COMPONENT = '5002'
 b = Database()
 b.set_ip_by_table_name(NAME_COMPONENT)
 b.set_port_by_table_name(NAME_COMPONENT, PORT_COMPONENT)
-
-print("ip: ", socket.gethostbyname(socket.gethostname()))
-
-ip = get('https://api.ipify.org').text
-print('My public IP address is: {}'.format(ip))
+# Get user supplied values
+casc_path = "haarcascade_frontalface_default.xml"
+# Create the haar cascade
+face_cascade = cv2.CascadeClassifier(casc_path)
 
 
 # After the change of the flag, update the config.
@@ -35,7 +34,6 @@ def init_config():
     config = {}
     config["TIME_BETWEEN_SENDS"] = 30
     config = update_config_ip_port(config)
-    print(config)
     return config
 
 
@@ -121,17 +119,10 @@ def check_equal_images(known_image, unknown_image):
 # Get image of person without mask and dictionary of the workers. Return the id of this person.
 # If not found, return -1.
 def get_id_worker(face, dict_workers):
-    # dict_workers = get_dictionary_workers()
     for key in dict_workers:
         if check_equal_images(dict_workers[key], face):
             return key
     return -1
-
-
-# Get user supplied values
-casc_path = "haarcascade_frontalface_default.xml"
-# Create the haar cascade
-face_cascade = cv2.CascadeClassifier(casc_path)
 
 
 # Get image, return list of faces that in this image.
@@ -226,25 +217,13 @@ def post_ids_to_manager(dict={}):
     print(x)
 
 
-# dict_workers = {}
 dict_workers = get_dictionary_workers()
-
-
-# is_init_dict_workers = False
 
 
 # Check if the flag of the config was chnaged and update if the flag equal to 1.
 def check_config_ip_port():
     if b.get_flag_ip_port_by_table_name(NAME_COMPONENT) == '1':
         update_config_ip_port(config)
-        print("after update")
-        print(config)
-
-
-# def check_if_dictionary_workers_changed():
-# if b.get_flag_dictionary_workers_changed():
-#     return get_dictionary_workers()
-# return dict_workers
 
 
 def analayzer(list_images):
@@ -265,39 +244,25 @@ def analayzer(list_images):
                 print("with mask")
                 continue
             print("without mask")
-            # global is_init_dict_workers
-            # global dict_workers
             flag_update_dict = int(b.get_analayzer_config_flag())
+            print('flag: ', flag_update_dict)
             if flag_update_dict == 1:
                 print("get dictionary workers")
                 global dict_workers
                 dict_workers = get_dictionary_workers()
-                # if len(dict_workers) > 0:
-                #     is_init_dict_workers = True
             # If there is no match, return -1.
             id_worker = get_id_worker(face, dict_workers)
             print("id: ", id_worker)
-
             if id_worker == -1:
                 continue
             dict_id_workers_without_mask[id_worker] = image
-            # print("after face")
-    is_init_dict_workers = False
     import copy
     post_ids_to_manager(copy.deepcopy(dict_id_workers_without_mask))
     print("time after from db: ", time.time() - time_before)
 
 
-from flask import Flask, jsonify, request
-import json, os, signal
-
-
-@app.route('/stop_server', methods=['GET'])
-def stopServer():
-    print("stopppp")
-    os.kill(os.getpid(), signal.SIGINT)
-    print("get pid")
-    return jsonify({"success": True, "message": "Server is shutting down..."})
+from flask import request
+import json, os
 
 
 def run_server():
@@ -306,7 +271,6 @@ def run_server():
         try:
             from waitress import serve
             serve(app, host='127.0.0.1', port=int(config[NAME_COMPONENT + '_port']))
-            # app.run(port=5002, debug=True)
         except:
             print("There is a problem with starting the analyzer")
 
