@@ -2,7 +2,6 @@ import time
 import face_recognition
 import os
 import requests
-# from keras.models import load_model
 from azure_sql_server import *
 from detect_image import mask_image
 from requests import get
@@ -16,9 +15,9 @@ b = Database()
 b.set_ip_by_table_name(NAME_COMPONENT)
 b.set_port_by_table_name(NAME_COMPONENT, PORT_COMPONENT)
 # Get user supplied values
-casc_path = "haarcascade_frontalface_default.xml"
+CASC_PATH = "haarcascade_frontalface_default.xml"
 # Create the haar cascade
-face_cascade = cv2.CascadeClassifier(casc_path)
+face_cascade = cv2.CascadeClassifier(CASC_PATH)
 
 
 # After the change of the flag, update the config.
@@ -37,6 +36,7 @@ def init_config():
     return config
 
 
+# Get the defult config from file.
 def init_config_from_file():
     PATH_TO_CONFIG = 'config_json.txt'
     config = read_json(PATH_TO_CONFIG)
@@ -149,6 +149,7 @@ def get_list_faces(image):
 app = Flask(__name__, template_folder="templates")
 
 
+# Listen to post from manager.
 @app.route('/', methods=['POST'])
 def result():
     print("post")
@@ -186,6 +187,7 @@ def convert_image_to_varbinary(filename):
     return image_64_encode
 
 
+# Get response of restApi and parse it to list of images.
 def get_list_images(response):
     data = json.loads(response)
     list_images = []
@@ -195,6 +197,7 @@ def get_list_images(response):
     return list_images
 
 
+# Prepare the dictionary for sending.
 def convert_dict_for_sending(dict):
     for key in dict:
         path = save_image(dict[key])
@@ -203,15 +206,20 @@ def convert_dict_for_sending(dict):
     return dict
 
 
+# Return the url of the manager.
 def get_url_manager():
     url = 'http://' + config['Manager_ip'] + ':' + config['Manager_port'] + '/'
     return url
 
 
+URL_MANAGER = 'http://127.0.0.1:5004/'
+
+
+# Post the dictionary with the results to the manager.
 def post_ids_to_manager(dict={}):
     dict = convert_dict_for_sending(dict)
     dict = json.dumps(dict)
-    url = 'http://127.0.0.1:5004/'
+    url = URL_MANAGER
     # url = get_url_manager()
     x = requests.post(url, data={'dict': dict})
     print(x)
@@ -226,6 +234,12 @@ def check_config_ip_port():
         update_config_ip_port(config)
 
 
+STRING_WITH_MASK = "Mask"
+STRING_WITHOUT_MASK = "No Mask"
+
+
+# The main function of the analazer the detect if there is faces and if there is a mask and detect the id of the
+# Workers that seen without mask.
 def analayzer(list_images):
     check_config_ip_port()
     print("analayzer")
@@ -238,9 +252,9 @@ def analayzer(list_images):
                 res = mask_image(face)
             except:
                 print("problem with result model")
-                res = "No Mask"
+                res = STRING_WITHOUT_MASK
             print("result: ", res)
-            if res == "Mask":
+            if res == STRING_WITH_MASK:
                 print("with mask")
                 continue
             print("without mask")
@@ -264,13 +278,17 @@ def analayzer(list_images):
 from flask import request
 import json, os
 
+IP_LOCAL_HOST = '127.0.0.1'
+STRING_PORT_DB = '_port'
 
+
+# Run the server for listen to manager.
 def run_server():
     print("hi analayzer")
     while True:
         try:
             from waitress import serve
-            serve(app, host='127.0.0.1', port=int(config[NAME_COMPONENT + '_port']))
+            serve(app, host=IP_LOCAL_HOST, port=int(config[NAME_COMPONENT + STRING_PORT_DB]))
         except:
             print("There is a problem with starting the analyzer")
 

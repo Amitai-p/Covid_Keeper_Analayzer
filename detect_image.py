@@ -7,9 +7,12 @@ import argparse
 import cv2
 import os
 
+PATH_TO_MODEL = "mask_detector.model"
 # load the face mask detector model from disk
-model = load_model("mask_detector.model")
+model = load_model(PATH_TO_MODEL)
 print("load model")
+
+
 def mask_image(image):
     # construct the argument parser and parse the arguments
     confidence = 0.5
@@ -19,11 +22,8 @@ def mask_image(image):
                                     "res10_300x300_ssd_iter_140000.caffemodel"])
     net = cv2.dnn.readNet(prototxtPath, weightsPath)
 
-
-
     # load the input image from disk, clone it, and grab the image spatial
     # dimensions
-    # image = cv2.imread(path_to_image)
     orig = image.copy()
     (h, w) = image.shape[:2]
 
@@ -75,9 +75,7 @@ def mask_image(image):
             label = "Mask" if mask > withoutMask else "No Mask"
             return label
 
-    # show the output image
-    # cv2.imshow("Output", image)
-    # cv2.waitKey(0)
+
 
 
 def test_model():
@@ -88,7 +86,3 @@ def test_model():
         path_to_image = path + img
         print(mask_image(path_to_image))
 
-
-# if __name__ == "__main__":
-#     test_model()
-#     # mask_image('Faces/Aberdam.jpg')
