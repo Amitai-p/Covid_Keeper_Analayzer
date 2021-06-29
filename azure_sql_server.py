@@ -52,17 +52,6 @@ class Database:
     def close_cursor(self):
         self.crsr.close()
 
-    # def get_image_worker(self, id_worker):
-    #     self.open_connection()
-    #     self.open_cursor()
-    #     select_sql = "SELECT Image From [dbo].[Workers] Where Id=" + id_worker
-    #     # image = self.convert_image_to_varbinary('Faces/Aberdam.jpg')
-    #     self.crsr.execute(select_sql)
-    #     data = self.crsr.fetchone()[0]
-    #     data = self.convert_bytes_to_image(data)
-    #     self.crsr.commit()
-    #     self.close_cursor()
-
     def start_or_close_threads(self):
         result = self.select_query_of_one_row("select Handle from [dbo].[Starter]")
         if not result:
@@ -113,7 +102,6 @@ class Database:
             workers_to_images_dict[details[0]] = image
         self.close_cursor()
         return workers_to_images_dict
-
 
     def get_ip_port_config(self, table_name):
         result = self.select_query_of_one_row("select Manager_port, Manager_ip, Analayzer_port, Analayzer_ip, "
