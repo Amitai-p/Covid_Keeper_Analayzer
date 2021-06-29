@@ -11,11 +11,21 @@ from flask import (
 
 NAME_COMPONENT = 'Analayzer'
 PORT_COMPONENT = '5002'
+KEY_TIME_BETWEEN_SENDS = 'TIME_BETWEEN_SENDS'
+KEY_MANAGER_IP = 'Manager_ip'
+KEY_MANAGER_PORT = 'Manager_port'
+PATH_TO_CONFIG = 'config_json.txt'
+PATH_TO_SAVED_PICTURES = 'saved_pictures'
+HTTP = 'http://'
+URL_MANAGER = 'http://127.0.0.1:5004/'
+IP_LOCAL_HOST = '127.0.0.1'
+STRING_PORT_DB = '_port'
+NAME_OF_FILE_TO_SAVE = 'testfile.jpg'
 b = Database()
 b.set_ip_by_table_name(NAME_COMPONENT)
 b.set_port_by_table_name(NAME_COMPONENT, PORT_COMPONENT)
 # Get user supplied values
-CASC_PATH = "haarcascade_frontalface_default.xml"
+CASC_PATH = 'haarcascade_frontalface_default.xml'
 # Create the haar cascade
 face_cascade = cv2.CascadeClassifier(CASC_PATH)
 
@@ -31,14 +41,13 @@ def update_config_ip_port(config):
 # Init the config at the first time running.
 def init_config():
     config = {}
-    config["TIME_BETWEEN_SENDS"] = 30
+    config[KEY_TIME_BETWEEN_SENDS] = 30
     config = update_config_ip_port(config)
     return config
 
 
 # Get the defult config from file.
 def init_config_from_file():
-    PATH_TO_CONFIG = 'config_json.txt'
     config = read_json(PATH_TO_CONFIG)
     config = update_config_ip_port(config)
     return config
@@ -80,10 +89,10 @@ def get_dictionary_workers():
 
 # Get image, save local, return path.
 def save_image(img):
-    if not os.path.exists('saved_pictures'):
-        os.makedirs('saved_pictures')
+    if not os.path.exists(PATH_TO_SAVED_PICTURES):
+        os.makedirs(PATH_TO_SAVED_PICTURES)
     import time
-    path_to_save = "saved_pictures/face%s.jpg" % str(time.time())
+    path_to_save = PATH_TO_SAVED_PICTURES + "/face%s.jpg" % str(time.time())
     cv2.imwrite(path_to_save, img)
     return path_to_save
 
@@ -122,7 +131,7 @@ def get_id_worker(face, dict_workers):
     for key in dict_workers:
         if check_equal_images(dict_workers[key], face):
             return key
-    return -1
+    return '-1'
 
 
 # Get image, return list of faces that in this image.
@@ -171,10 +180,10 @@ def result():
 def convert_bytes_to_image(data):
     data = bytes(data.decode('utf8')[:-1], 'utf-8')
     image_64_decode = base64.decodebytes(data)
-    image_result = open('testfile.jpg', 'wb')
+    image_result = open(NAME_OF_FILE_TO_SAVE, 'wb')
     image_result.write(image_64_decode)
     image_result.close()
-    image = cv2.imread('testfile.jpg')
+    image = cv2.imread(NAME_OF_FILE_TO_SAVE)
     return image
 
 
@@ -208,11 +217,8 @@ def convert_dict_for_sending(dict):
 
 # Return the url of the manager.
 def get_url_manager():
-    url = 'http://' + config['Manager_ip'] + ':' + config['Manager_port'] + '/'
+    url = HTTP + config[KEY_MANAGER_IP] + ':' + config[KEY_MANAGER_PORT] + '/'
     return url
-
-
-URL_MANAGER = 'http://127.0.0.1:5004/'
 
 
 # Post the dictionary with the results to the manager.
@@ -267,7 +273,7 @@ def analayzer(list_images):
             # If there is no match, return -1.
             id_worker = get_id_worker(face, dict_workers)
             print("id: ", id_worker)
-            if id_worker == -1:
+            if id_worker == '-1':
                 continue
             dict_id_workers_without_mask[id_worker] = image
     import copy
@@ -277,9 +283,6 @@ def analayzer(list_images):
 
 from flask import request
 import json, os
-
-IP_LOCAL_HOST = '127.0.0.1'
-STRING_PORT_DB = '_port'
 
 
 # Run the server for listen to manager.

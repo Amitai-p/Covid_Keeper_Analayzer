@@ -97,8 +97,6 @@ class Database:
         stream = io.BytesIO(data)
         _stream = stream.getvalue()
         image = cv2.imdecode(np.fromstring(_stream, dtype=np.uint8), 1)
-        # cv2.imshow("Faces found", image)
-        # cv2.waitKey(0)
         return image
 
     def get_workers_to_images_dict(self):
@@ -114,64 +112,8 @@ class Database:
             image = self.convert_bytes_to_image(image_bytes)
             workers_to_images_dict[details[0]] = image
         self.close_cursor()
-        # self.crsr.commit()
         return workers_to_images_dict
 
-    def get_fullname_and_email_by_id(self, id_worker):
-        select_sql = "SELECT FullName, Email_address From [dbo].[Workers] Where Id=" + id_worker
-        result = self.select_query_of_one_row(select_sql)
-        fullname = result[0]
-        email = result[1]
-        return fullname, email
-
-    def insert_event(self, id_worker):
-        insert_sql = "INSERT INTO [dbo].[History_events] (Id_worker, Time_of_event) " \
-                     "VALUES (?,?)"
-        f = '%Y-%m-%d %H:%M:%S'
-        values_list = [id_worker, datetime.datetime.now().strftime(f)]
-        self.insert_query_of_one_row(query=insert_sql, values_list=values_list)
-
-    def get_events_order_with_max_time(self):
-        # self.open_connection()
-        # self.open_cursor()
-        # self.crsr.execute(select_sql)
-        # # data = self.crsr.fetchone()
-        # events_order_by_max_time = []
-        # for details in self.crsr:
-        #     events_order_by_max_time.append(details)
-        # self.close_cursor()
-        # self.crsr.commit()
-        select_sql = "select id_worker, Max(Time_of_event) from [dbo].[History_events] " \
-                     "group by id_worker order by Max(Time_of_event) desc;"
-        result = self.select_query_of_many_rows(select_sql)
-        events_order_by_max_time = []
-        for details in result:
-            events_order_by_max_time.append(details)
-        return events_order_by_max_time
-
-    def get_max_time_of_event_by_id_worker(self, id_worker):
-        result = self.select_query_of_one_row("select Max(Time_of_event) "
-                                              "from [dbo].[History_events] where Id_worker=" + id_worker)
-        if not result:
-            return None
-        return result[0]
-
-    def get_manager_config_flag(self):
-        result = self.select_query_of_one_row("select Handle from [dbo].[Manager_Config]")
-        if not result:
-            return None
-        return result[0]
-
-    def get_manager_config_dict(self):
-        result = self.select_query_of_one_row("select Minutes_between_mails from [dbo].[Manager_Config]")
-        if not result:
-            return None
-        self.set_manager_config_flag()
-        config_dict = {"Minutes_between_mails": result[0]}
-        return config_dict
-
-    def set_manager_config_flag(self):
-        self.update_query("update [dbo].[Manager_Config] set Handle = 0")
 
     def get_ip_port_config(self, table_name):
         result = self.select_query_of_one_row("select Manager_port, Manager_ip, Analayzer_port, Analayzer_ip, "
@@ -208,7 +150,6 @@ class Database:
         if not result:
             return None
         return result[0]
-
 
     def get_analayzer_config_flag(self):
         result = self.select_query_of_one_row("select Handle from [dbo].[Analayzer_config]")
