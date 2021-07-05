@@ -26,7 +26,7 @@ class Database:
             database_name = 'myCovidKeeper'
             server = '{server_name}.database.windows.net'.format(server_name=server_name)
             username = 'azureuser'
-            password = 'Amitai5925'
+            password = '****'
 
             connection_string = textwrap.dedent(f'''
                 Driver={driver};
